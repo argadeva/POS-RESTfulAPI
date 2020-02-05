@@ -4,7 +4,7 @@ module.exports = {
   getCheckout: () => {
     return new Promise((resolve, reject) => {
       connection.query(
-        "SELECT t1.id, t1.order_number, SUM(qty * price) sub_total, SUM(qty * price) * 10 / 100 ppn, SUM(qty * price) + SUM(qty * price) * 10 / 100 total, t1.created_at, t1.user_id, t3.name FROM checkout t1 INNER JOIN checkout_detail t2 ON t1.id = t2.order_id INNER JOIN users t3 ON t1.user_id = t3.id GROUP BY id",
+        "SELECT checkout.*, users.name FROM checkout INNER JOIN users ON checkout.user_id = users.id GROUP BY id",
         (err, result) => {
           if (!err) {
             resolve(result);
@@ -18,7 +18,7 @@ module.exports = {
   getCheckoutbyId: id_users => {
     return new Promise((resolve, reject) => {
       connection.query(
-        "SELECT t1.id, t1.order_number, SUM(qty * price) sub_total, SUM(qty * price) * 10 / 100 ppn, SUM(qty * price) + SUM(qty * price) * 10 / 100 total, t1.created_at, t1.user_id, t3.name FROM checkout t1 INNER JOIN checkout_detail t2 ON t1.id = t2.order_id INNER JOIN users t3 ON t1.user_id = t3.id WHERE t1.user_id = ?",
+        "SELECT checkout.*, users.name FROM checkout INNER JOIN users ON checkout.user_id = users.id WHERE user_id = ?",
         id_users,
         (err, result) => {
           if (!err) {
@@ -33,7 +33,22 @@ module.exports = {
   getCheckoutDetail: id_checkout => {
     return new Promise((resolve, reject) => {
       connection.query(
-        "SELECT t1.id, t1.order_number, SUM(qty * price) sub_total, SUM(qty * price) * 10 / 100 ppn, SUM(qty * price) + SUM(qty * price) * 10 / 100 total, t1.created_at, t1.user_id, t3.name FROM checkout t1 INNER JOIN checkout_detail t2 ON t1.id = t2.order_id INNER JOIN users t3 ON t1.user_id = t3.id WHERE t1.user_id = ?",
+        "SELECT checkout.*, users.name FROM checkout INNER JOIN users ON checkout.user_id = users.id WHERE checkout.id = ?",
+        id_checkout,
+        (err, result) => {
+          if (!err) {
+            resolve(result);
+          } else {
+            reject(new Error(err));
+          }
+        }
+      );
+    });
+  },
+  getAddDetail: id_checkout => {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        "SELECT * FROM checkout WHERE id = ?",
         id_checkout,
         (err, result) => {
           if (!err) {
@@ -85,6 +100,17 @@ module.exports = {
               (err, result) => {
                 if (!err) {
                   resolve(result);
+                  connection.query(
+                    "UPDATE checkout SET sub_total = sub_total + ?, ppn = (sub_total*10)/100, total = sub_total+((sub_total*10)/100) WHERE id = ?",
+                    [data.total, data.order_id],
+                    (err, result) => {
+                      if (!err) {
+                        resolve(result);
+                      } else {
+                        reject(new Error(err));
+                      }
+                    }
+                  );
                 } else {
                   reject(new Error(err));
                 }

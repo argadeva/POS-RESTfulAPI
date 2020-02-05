@@ -53,46 +53,50 @@ module.exports = {
     const id_product = product_id;
     token = req.headers["x-access-token"];
     id_users = token.substr(0, token.indexOf("#"));
-    checkoutModel
-      .getCheckoutDetail(order_id)
-      .then(resultx => {
-        if (resultx[0].user_id !== Number(id_users)) {
-          miscHelper.response(
-            res,
-            "",
-            "Your account not authorized for this cart!",
-            401
-          );
-        } else {
-          productsModel
-            .detailProducts(id_product)
-            .then(result => {
-              if (result[0].stock - qty >= 0) {
-                const data = {
-                  order_id,
-                  product_id,
-                  price: result[0].price,
-                  qty,
-                  total: result[0].price * qty
-                };
-                checkoutModel
-                  .addCart(data)
-                  .then(result2 => {
-                    miscHelper.response(res, result2, "Success", 200);
-                  })
-                  .catch(err => console.log(err));
-              } else {
-                miscHelper.response(
-                  res,
-                  "",
-                  `Product stock not available! Only left ${result[0].stock} Pcs`,
-                  401
-                );
-              }
-            })
-            .catch(err => console.log(err));
-        }
-      })
-      .catch(err => console.log(err));
+    if (qty > 0) {
+      checkoutModel
+        .getAddDetail(order_id)
+        .then(resultx => {
+          if (resultx[0].user_id !== Number(id_users)) {
+            miscHelper.response(
+              res,
+              "",
+              "Your account not authorized for this cart!",
+              401
+            );
+          } else {
+            productsModel
+              .detailProducts(id_product)
+              .then(result => {
+                if (result[0].stock - qty >= 0) {
+                  const data = {
+                    order_id,
+                    product_id,
+                    price: result[0].price,
+                    qty,
+                    total: result[0].price * qty
+                  };
+                  checkoutModel
+                    .addCart(data)
+                    .then(result2 => {
+                      miscHelper.response(res, result2, "Success", 200);
+                    })
+                    .catch(err => console.log(err));
+                } else {
+                  miscHelper.response(
+                    res,
+                    "",
+                    `Product stock not available! Only left ${result[0].stock} Pcs`,
+                    401
+                  );
+                }
+              })
+              .catch(err => console.log(err));
+          }
+        })
+        .catch(err => console.log(err));
+    } else {
+      miscHelper.response(res, "", "Qty must be greater than 0!", 400);
+    }
   }
 };
