@@ -40,6 +40,6 @@ Router.patch(
 Router.delete("/:id_product", checkToken, productsController.deleteProducts);
 Router.get("/search/:search", checkToken, productsController.searchProducts);
 Router.get("/sort/:sort", checkToken, productsController.sortProducts);
-Router.get("/page/:page", checkToken, productsController.pageProducts);
+Router.get("/pagination/:page", checkToken, productsController.pageProducts);
 
 module.exports = Router;

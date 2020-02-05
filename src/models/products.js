@@ -127,5 +127,34 @@ module.exports = {
         }
       );
     });
+  },
+  countProduct: () => {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        "SELECT COUNT (*) as rom FROM products",
+        (err, result) => {
+          if (!err) {
+            resolve(result);
+          } else {
+            reject(new Error(err));
+          }
+        }
+      );
+    });
+  },
+  paginationProduct: (startIndex, limit) => {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        "SELECT * FROM products LIMIT ? OFFSET ?",
+        [parseInt(limit), parseInt(startIndex)],
+        (err, result) => {
+          if (!err) {
+            resolve(result);
+          } else {
+            reject(new Error(err));
+          }
+        }
+      );
+    });
   }
 };

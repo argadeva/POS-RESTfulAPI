@@ -164,11 +164,31 @@ module.exports = {
   },
   pageProducts: (req, res) => {
     const page = req.params.page;
-    productsModel
-      .pageProducts(page)
-      .then(result => {
-        miscHelper.response(res, result, "Success", 200);
-      })
-      .catch(err => console.log(err));
+    const limit = 2;
+
+    let offset = page > 1 ? page * limit - limit : 0;
+    let totalRec = 0;
+    let pageCount = 0;
+
+    productsModel.countProduct().then(result => {
+      totalRec = result[0].rom;
+      pageCount = Math.ceil(totalRec / limit);
+
+      productsModel
+        .paginationProduct(offset, limit)
+        .then(result => {
+          res.json({
+            page: parseInt(page),
+            offset: offset,
+            limit: parseInt(limit),
+            total: parseInt(totalRec),
+            totalPage: parseInt(pageCount),
+            next_page: page < pageCount - 1 ? parseInt(page) + 1 : null,
+            prev_page: page > 1 ? page - 1 : null,
+            data: result
+          });
+        })
+        .catch(err => console.log(err));
+    });
   }
 };
