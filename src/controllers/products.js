@@ -183,8 +183,16 @@ module.exports = {
             limit: parseInt(limit),
             total: parseInt(totalRec),
             totalPage: parseInt(pageCount),
-            next_page: page < pageCount - 1 ? parseInt(page) + 1 : null,
-            prev_page: page > 1 ? page - 1 : null,
+            next_page:
+              page < pageCount - 1
+                ? `${process.env.URL}api/v1/products/pagination/${Number(page) +
+                    1}`
+                : null,
+            prev_page:
+              page > 1
+                ? `${process.env.URL}api/v1/products/pagination/${Number(page) -
+                    1}`
+                : null,
             data: result
           });
         })
