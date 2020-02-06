@@ -36,7 +36,7 @@ module.exports = {
       image:
         typeof req.file !== "undefined"
           ? `${process.env.URL}uploads/${req.file.filename}`
-          : null,
+          : "",
       stock: 0,
       category_id
     };
